@@ -2,6 +2,7 @@ import sandboxModel from "../models/sandbox.model.js";
 import { deletePod, createPod } from "../kubernetes/pod.js";
 import { deleteService, createService } from "../kubernetes/service.js";
 import { v7 as uuid } from "uuid";
+import { redis } from "../config/redis.js";
 
 
 

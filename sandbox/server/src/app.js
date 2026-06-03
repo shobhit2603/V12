@@ -2,6 +2,8 @@ import express from "express"
 import morgan from "morgan"
 import cookieParser from "cookie-parser";
 import sandboxRoutes from "./routes/sandbox.route.js";
+import { subscriber } from "./config/redis.js";
+import { deletePod, deleteService } from "./kubernetes/pod.js";
 
 const app = express();
 
@@ -28,5 +30,13 @@ app.get("/_status/readyz", (req, res) => {
 
 
 app.use("/api/sandbox", sandboxRoutes);
+
+
+subscriber.on("message", async (channel, key) => {
+    const sandboxId = key.split(":")[ 1 ];
+
+    await deletePod(sandboxId);
+    await deleteService(sandboxId);
+})
 
 export default app;
