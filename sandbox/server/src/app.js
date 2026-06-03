@@ -3,7 +3,8 @@ import morgan from "morgan"
 import cookieParser from "cookie-parser";
 import sandboxRoutes from "./routes/sandbox.route.js";
 import { subscriber } from "./config/redis.js";
-import { deletePod, deleteService } from "./kubernetes/pod.js";
+import { deletePod } from "./kubernetes/pod.js";
+import { deleteService } from "./kubernetes/service.js";
 
 const app = express();
 
