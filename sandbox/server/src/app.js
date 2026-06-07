@@ -1,8 +1,16 @@
 import express from "express"
 import morgan from "morgan"
+import cookieParser from "cookie-parser";
+import sandboxRoutes from "./routes/sandbox.route.js";
+import { subscriber } from "./config/redis.js";
+import { deletePod } from "./kubernetes/pod.js";
+import { deleteService } from "./kubernetes/service.js";
 
 const app = express();
+
 app.use(morgan("dev"));
+app.use(express.json());
+app.use(cookieParser());
 
 app.get("/", (req,res)=>{
     res.send("Hello world!")
@@ -20,17 +28,16 @@ app.get("/_status/readyz", (req, res) => {
     });
 });
 
-app.post("/api/sandbox/start", async (req, res) => {
-    const sandboxId = uuid();
 
-    await createService(sandboxId);
 
-    res.status(201).json({
-        message: "Sandbox environment created successfully",
-        sandboxId,
-        preview: `${sandboxId}.preview.localhost`
-    });
-    
+app.use("/api/sandbox", sandboxRoutes);
+
+
+subscriber.on("message", async (channel, key) => {
+    const sandboxId = key.split(":")[ 1 ];
+
+    await deletePod(sandboxId);
+    await deleteService(sandboxId);
 })
 
 export default app;
